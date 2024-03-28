@@ -2,6 +2,7 @@
 #include "../../header/Graphics/GraphicService.h"
 #include "../../header/Event/EventService.h"
 #include "../../header/UI/UIService.h"
+#include "../../header/Player/PlayerController.h"
 
 namespace Main
 {
@@ -53,6 +54,9 @@ namespace Main
 	{
 		game_window->clear();
 		service_locator->render();
+		for (auto& bullet : ServiceLocator::getInstance()->getPlayerController()->getBullets()) {
+			game_window->draw(bullet->getSprite());
+		}
 		game_window->display();
 	}
 

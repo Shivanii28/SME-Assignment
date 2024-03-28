@@ -1,3 +1,5 @@
+// PlayerController.cpp
+
 #include "../../header/Player/PlayerController.h"
 #include "../../header/Player/PlayerView.h"
 #include "../../header/Player/PlayerModel.h"
@@ -9,6 +11,7 @@
 #include "../../header/Sound/SoundService.h"
 #include "../../header/Main/GameService.h"
 #include "../../header/Gameplay/HighScore.h"
+#include "../../Bullet.h"
 
 namespace Player
 {
@@ -22,14 +25,20 @@ namespace Player
 	using namespace Main;
 	using namespace Gameplay;
 
-	PlayerController::PlayerController()
+	PlayerController::PlayerController() : bulletCooldownDuration(0.2f), timeSinceLastBullet(0.0f), elapsed_fire_duration(0.0f),
+		elapsed_freez_duration(0.0f), elapsed_rapid_fire_duration(0.0f), elapsed_shield_duration(0.0f),
+		elapsed_tripple_laser_duration(0.0f)
 	{
 		player_view = new PlayerView();
 		player_model = new PlayerModel();
+
 	}
 
 	PlayerController::~PlayerController()
 	{
+		for (auto& bullet : bullets) {
+			delete bullet;
+		}
 		delete (player_view);
 		delete (player_model);
 	}
@@ -40,17 +49,40 @@ namespace Player
 		player_view->initialize(this);
 	}
 
+
 	void PlayerController::update()
 	{
+		timeSinceLastBullet += ServiceLocator::getInstance()->getTimeService()->getDeltaTime();
+
 		switch (player_model->getPlayerState())
 		{
-		case::Player::PlayerState::ALIVE:
+		case PlayerState::ALIVE:
 			processPlayerInput();
 			break;
 
-		case::Player::PlayerState::FROZEN:
+		case PlayerState::FROZEN:
 			updateFreezDuration();
+
 			break;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+			if (timeSinceLastBullet > bulletCooldownDuration) {
+				fireBullet();
+				timeSinceLastBullet = 0.0f; // Reset the time for cooldown
+			}
+		}
+
+		// Update bullets
+		for (auto it = bullets.begin(); it != bullets.end();) {
+			(*it)->update();
+			if ((*it)->isOutOfBounds()) {
+				delete* it;
+				it = bullets.erase(it);
+			}
+			else {
+				++it;
+			}
 		}
 
 		updatePowerupDuration();
@@ -84,7 +116,7 @@ namespace Player
 
 	void PlayerController::onCollision(ICollider* other_collider)
 	{
-		if(processPowerupCollision(other_collider)) 
+		if (processPowerupCollision(other_collider))
 			return;
 
 		processEnemyCollision(other_collider);
@@ -92,7 +124,7 @@ namespace Player
 
 	bool PlayerController::processEnemyCollision(ICollider* other_collider)
 	{
-		if (player_model->isShieldEnabled()) 
+		if (player_model->isShieldEnabled())
 			return false;
 
 		EnemyController* enemy_controller = dynamic_cast<EnemyController*>(other_collider);
@@ -120,24 +152,24 @@ namespace Player
 		if (elapsed_shield_duration > 0)
 		{
 			elapsed_shield_duration -= ServiceLocator::getInstance()->getTimeService()->getDeltaTime();
-			
-			if (elapsed_shield_duration <= 0) 
+
+			if (elapsed_shield_duration <= 0)
 				disableShield();
 		}
 
 		if (elapsed_rapid_fire_duration > 0)
 		{
 			elapsed_rapid_fire_duration -= ServiceLocator::getInstance()->getTimeService()->getDeltaTime();
-			
-			if (elapsed_rapid_fire_duration <= 0) 
+
+			if (elapsed_rapid_fire_duration <= 0)
 				disableRapidFire();
 		}
 
 		if (elapsed_tripple_laser_duration > 0)
 		{
 			elapsed_tripple_laser_duration -= ServiceLocator::getInstance()->getTimeService()->getDeltaTime();
-			
-			if (elapsed_tripple_laser_duration <= 0) 
+
+			if (elapsed_tripple_laser_duration <= 0)
 				disableTrippleLaser();
 		}
 	}
@@ -194,10 +226,10 @@ namespace Player
 	{
 		EventService* event_service = ServiceLocator::getInstance()->getEventService();
 
-		if (event_service->pressedLeftArrowKey() || event_service->pressedAKey()) 
-			moveLeft();	
+		if (event_service->pressedLeftArrowKey() || event_service->pressedAKey())
+			moveLeft();
 
-		if (event_service->pressedRightArrowKey() || event_service->pressedDKey()) 
+		if (event_service->pressedRightArrowKey() || event_service->pressedDKey())
 			moveRight();
 
 		//if (event_service->pressedLeftMouseButton()) 
@@ -257,4 +289,13 @@ namespace Player
 			HighScore::saveHighScore(current_high_score);
 		}
 	}
+	void PlayerController::fireBullet() {
+		// Create a new bullet at the player's position
+		bullets.push_back(new SimpleBullet(player_model->getPlayerPosition()));
+	}
+
+	const std::vector<Bullet*>& PlayerController::getBullets() const {
+		return bullets;
+	}
+
 }

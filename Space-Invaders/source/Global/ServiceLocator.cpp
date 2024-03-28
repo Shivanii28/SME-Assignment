@@ -16,7 +16,7 @@ namespace Global
 	using namespace Sound;
 	using namespace Collision;
 	using namespace Particle;
-
+	ServiceLocator* ServiceLocator::instance = nullptr;
 	ServiceLocator::ServiceLocator()
 	{
 		graphic_service = nullptr;
@@ -67,6 +67,7 @@ namespace Global
 		particle_service->initialize();
 		ui_service->initialize();
 		sound_service->initialize();
+		playerController = new Player::PlayerController();
 	}
 
 	void ServiceLocator::update()
@@ -123,8 +124,12 @@ namespace Global
 
 	ServiceLocator* ServiceLocator::getInstance()
 	{
-		static ServiceLocator instance;
-		return &instance;
+		if (!instance)
+		{
+			instance = new ServiceLocator();
+		}
+		
+		return instance;
 	}
 
 	EventService* ServiceLocator::getEventService() { return event_service; }
@@ -150,6 +155,10 @@ namespace Global
 	Gameplay::GameplayService* ServiceLocator::getGameplayService() { return gameplay_service; }
 
 	Sound::SoundService* ServiceLocator::getSoundService() { return sound_service; }
+	Player::PlayerController* ServiceLocator::getPlayerController() const
+	{
+		return playerController;
+	}
 
 	void ServiceLocator::deleteServiceLocator() { delete(this); }
 }

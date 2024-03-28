@@ -73,6 +73,8 @@ namespace Powerup
 		return powerup_view->getPowerupSprite();
 	}
 
+	// PowerupController.cpp
+
 	void PowerupController::onCollision(ICollider* other_collider)
 	{
 		PlayerController* player_controller = dynamic_cast<PlayerController*>(other_collider);
@@ -80,7 +82,11 @@ namespace Powerup
 		if (player_controller)
 		{
 			applyPowerup();
+			if (getPowerupType() == PowerupType::Bullet) {
+				player_controller->fireBullet(); // Trigger bullet shooting
+			}
 			ServiceLocator::getInstance()->getPowerupService()->destroyPowerup(this);
 		}
 	}
+
 }

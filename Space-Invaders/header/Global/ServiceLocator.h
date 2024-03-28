@@ -11,6 +11,7 @@
 #include "../../header/Sound/SoundService.h"
 #include "../../header/Collision/CollisionService.h"
 #include "../../header/Particle/ParticleService.h"
+#include "../../header/Player/PlayerController.h"
 
 namespace Global
 {
@@ -29,6 +30,8 @@ namespace Global
         Sound::SoundService* sound_service;
         Collision::CollisionService* collision_service;
         Particle::ParticleService* particle_service;
+        static ServiceLocator* instance;
+        Player::PlayerController* playerController;
 
         ServiceLocator();
         ~ServiceLocator();
@@ -55,6 +58,7 @@ namespace Global
         Sound::SoundService* getSoundService();
         Collision::CollisionService* getCollisionService();
         Particle::ParticleService* getParticleService();
+        Player::PlayerController* getPlayerController() const;
         void deleteServiceLocator();
     };
 }

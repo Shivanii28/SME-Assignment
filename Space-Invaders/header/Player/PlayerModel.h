@@ -54,7 +54,8 @@ namespace Player
         const float tripple_laser_position_offset = 30.f;
 
         const float player_movement_speed = 350.0f;
-        static const int invincible_player_alpha = 170.f;
+        //static const int invincible_player_alpha = 170.f;
+        static const int invincible_player_alpha = static_cast<int>(170.f + 0.5f); // Rounding to the nearest integer
 
         PlayerModel();
         ~PlayerModel();

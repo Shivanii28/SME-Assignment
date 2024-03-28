@@ -4,6 +4,12 @@
 #include "../../header/Powerup/PowerupConfig.h"
 #include "../../header/Player/PlayerModel.h"
 #include "../../header/Player/PlayerView.h"
+#include <vector>
+#include "../../Bullet.h"
+
+namespace Player {
+    class PlayerView;
+}
 
 namespace Player
 {
@@ -17,6 +23,13 @@ namespace Player
         float elapsed_fire_duration;
         float elapsed_freez_duration;
 
+        sf::Clock bulletCooldownClock;
+        float bulletCooldownDuration;
+        float timeSinceLastBullet; // Add this member variable
+
+        sf::Vector2f playerPosition;
+        std::vector<Bullet*> bullets;
+
         PlayerView* player_view;
         PlayerModel* player_model;
 
@@ -29,9 +42,9 @@ namespace Player
         void updateFreezDuration();
         void freezPlayer();
         void updatePowerupDuration();
-       
-        void disableShield();   
-        void disableRapidFire();    
+
+        void disableShield();
+        void disableRapidFire();
         void disableTrippleLaser();
 
         void saveHighScore();
@@ -42,16 +55,19 @@ namespace Player
 
         void initialize();
         void update();
+        void fireBullet();
         void render();
-
         void reset();
+
+
+        const std::vector<Bullet*>& getBullets() const;
 
         void decreasePlayerLive();
         inline void increaseScore(int val) { PlayerModel::player_score += val; }
         inline void decreaseScore(int val) { PlayerModel::player_score -= val; }
         inline void increaseEnemiesKilled(int val) { PlayerModel::enemies_killed += val; }
         inline void increaseBulletsFired(int val) { PlayerModel::bullets_fired += val; }
-        
+
         void enableShield();
         void enableRapidFire();
         void enableTrippleLaser();

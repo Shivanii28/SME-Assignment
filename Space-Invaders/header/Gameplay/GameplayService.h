@@ -1,5 +1,5 @@
 #pragma once
-
+#include <SFML/Graphics.hpp>
 namespace Gameplay
 {
 	class GameplayController;
@@ -8,6 +8,7 @@ namespace Gameplay
 	{
 	private:
 		GameplayController* gameplay_controller;
+		sf::RenderWindow* game_window = nullptr;
 
 	public:
 		GameplayService();
